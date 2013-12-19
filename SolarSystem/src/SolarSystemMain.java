@@ -14,6 +14,10 @@ public class SolarSystemMain {
 		SolarSystem s = new SolarSystem();
 		con.add(s);
 		
+		//set up keyboard focus
+		s.setFocusable(true);
+		s.requestFocusInWindow();
+		
 		win.setVisible(true);
 		s.reset();
 	}

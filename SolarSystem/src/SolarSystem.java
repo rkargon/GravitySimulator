@@ -2,6 +2,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
@@ -10,8 +12,8 @@ import javax.swing.Timer;
 public class SolarSystem extends JPanel {
 	private final int TIMER_DELAY = 20;
 
-	private int nplanets = 900;
-	private int maxvelocity = 0;
+	private int nplanets = 800;
+	private double maxvelocity = 3.5;
 
 	private Timer timer;
 	private ArrayList<Planet> planets;
@@ -20,6 +22,8 @@ public class SolarSystem extends JPanel {
 		super();
 
 		this.setBackground(Color.BLACK);
+		this.addKeyListener(new SolarSystemKeyAdapter());
+
 		planets = new ArrayList<Planet>(nplanets);
 
 		timer = new Timer(TIMER_DELAY, new ActionListener() {
@@ -31,6 +35,9 @@ public class SolarSystem extends JPanel {
 	}
 
 	public void reset() {
+		timer.stop();
+
+		planets = new ArrayList<Planet>(nplanets);
 		for (int i = 1; i <= nplanets; i++) {
 			double mass = Math.random() * 100 + 1;
 			double r = Math.sqrt(mass);
@@ -62,23 +69,36 @@ public class SolarSystem extends JPanel {
 					dy = p.y - p2.y;
 					drsquared = dx * dx + dy * dy;
 
-					// when worlds collide...
-					if (drsquared < r1 * r1 + r2 * r2) {
-						double vx_new, vy_new;
+					// when worlds collide... (said George Pal to his bride...)
+					if (drsquared < (r1 + r2) * (r1 + r2)) {
+						double vx_new, vy_new, x_new, y_new;
 
-						// determine new velocity, based on relative masses
-						// of
-						// planets
+						// determine new velocity & location, based on relative
+						// masses of planets
+						x_new = (p.x * p.mass + p2.x * p2.mass)
+								/ (p.mass + p2.mass);
+						y_new = (p.y * p.mass + p2.y * p2.mass)
+								/ (p.mass + p2.mass);
+
 						vx_new = (p.vx * p.mass + p2.vx * p2.mass)
 								/ (p.mass + p2.mass);
 						vy_new = (p.vy * p.mass + p2.vy * p2.mass)
 								/ (p.mass + p2.mass);
 
 						p.mass += p2.mass;
+
+						p.x = x_new;
+						p.y = y_new;
 						p.vx = vx_new;
 						p.vy = vy_new;
-						planets.remove(j);
+						r1 = p.getRadius();// update radius with new mass
+						planets.remove(j); // delete other planet
+
+						// update indices when planet is deleted
 						j--;
+						if (i > j)
+							i--;
+
 						continue;
 					}
 
@@ -120,6 +140,14 @@ public class SolarSystem extends JPanel {
 			r = p.getRadius();
 			g.fillOval((int) (p.x - r), (int) (p.y - r), (int) (r * 2),
 					(int) (r * 2));
+		}
+	}
+
+	class SolarSystemKeyAdapter extends KeyAdapter {
+
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_SPACE)
+				reset();
 		}
 	}
 }
