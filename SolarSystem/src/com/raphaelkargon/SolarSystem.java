@@ -16,6 +16,11 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class SolarSystem extends JPanel {
+	/**
+	 * Generated id
+	 */
+	private static final long serialVersionUID = -210028054724180246L;
+
 	private final int TIMER_DELAY = 16;
 
 	private int nplanets = 1000;
@@ -69,8 +74,14 @@ public class SolarSystem extends JPanel {
 			double mass = Math.random() * 100 + 1;
 			double x = Math.random() * getWidth();
 			double y = Math.random() * getHeight();
-			double vx = Math.random() * maxvelocity * 2.0 - maxvelocity;
-			double vy = Math.random() * maxvelocity * 2.0 - maxvelocity;
+			double xplane = (x-getWidth()/2);
+			double yplane = (y-getHeight()/2);
+			double theta = Math.atan2(yplane, xplane);
+			double r = Math.sqrt(xplane*xplane+yplane*yplane)/200;
+			double vx = r*Math.sin(theta);
+			double vy=-r*Math.cos(theta);
+			/*double vx = Math.random() * maxvelocity * 2.0 - maxvelocity;
+			double vy = Math.random() * maxvelocity * 2.0 - maxvelocity;*/
 
 			planets.add(new Planet(mass, vx, vy, x, y));
 		}
@@ -79,7 +90,7 @@ public class SolarSystem extends JPanel {
 	}
 
 	public void moveplanets() {
-		Planet p = null, p2 = null, tmp = null;
+		Planet p = null, p2 = null;
 		double drsquared, dx, dy, r1, r2;
 
 		for (int i = 0; i < planets.size(); i++) {
@@ -288,10 +299,17 @@ public class SolarSystem extends JPanel {
 								nearest = tmp;
 							}
 						}
+						
+						//if oriting large negative mass, orbit is impossible, allow user to select speed
+						if(nearest.mass + np_mass < 0){
+							is_setting_velocity=true;
+							return;
+						}
+						
 						min_dist = Math.sqrt(min_dist);
 						
 						v_tot = Math.sqrt(Planet.G*(np_mass + nearest.mass)/min_dist);
-						v_tot *= 0.1;
+						v_tot *= 0.1 ;//TODO: don't know why you need to do this :-/ (velocities still seem a tad to low)
 						np_vx = v_tot * (np_y-nearest.y)/min_dist + nearest.vx;
 						np_vy = -v_tot * (np_x-nearest.x)/min_dist + nearest.vy;
 						System.out.println(v_tot);
@@ -313,12 +331,13 @@ public class SolarSystem extends JPanel {
 			if (is_setting_velocity) {
 				np_vx = (e.getX() - np_x);
 				np_vy = (e.getY() - np_y);
-			} else
+			} else {
 				np_mass = (e.getX() - np_x) * (e.getX() - np_x)
 						+ (e.getY() - np_y) * (e.getY() - np_y);
 
-			if (e.isShiftDown())
-				np_mass = -np_mass; // aw yess, negative mass!
+				if (e.isShiftDown())
+					np_mass = -np_mass; // aw yiss, negative mass!
+			}
 
 			repaint();
 		}
