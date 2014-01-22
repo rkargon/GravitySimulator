@@ -77,7 +77,7 @@ public class SolarSystem extends JPanel {
 			double xplane = (x-getWidth()/2);
 			double yplane = (y-getHeight()/2);
 			double theta = Math.atan2(yplane, xplane);
-			double r = Math.sqrt(xplane*xplane+yplane*yplane)/200;
+			double r = Math.sqrt(xplane*xplane+yplane*yplane)/300;
 			double vx = r*Math.sin(theta);
 			double vy=-r*Math.cos(theta);
 			/*double vx = Math.random() * maxvelocity * 2.0 - maxvelocity;
